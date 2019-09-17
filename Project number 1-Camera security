@@ -1,0 +1,280 @@
+  #include <SoftwareSerial.h>
+  SoftwareSerial BTserial(10,11); // RX | TX
+  // Connect the HC-06 TX to the Arduino RX on pin 2. 
+  // Connect the HC-06 RX to the Arduino TX on pin 3 through a voltage divider.
+  // 
+
+  #include <Servo.h>
+  Servo MyServo;
+  Servo MyServoB;
+  int pos = 90; 
+  int posB = 90; 
+  char order,updown,temp;
+  char MODE_A;
+  //-------------------------------------------------
+  void setup() 
+  {
+  //---------------------------------------------
+  
+  // initialize the digital pin as an output.
+  Serial.begin(9600);
+  pinMode(2, INPUT_PULLUP); 
+  pinMode(3, INPUT_PULLUP); 
+  pinMode(4, INPUT_PULLUP); 
+  pinMode(5, INPUT_PULLUP); 
+  pinMode(13, OUTPUT); 
+  MyServo.attach(9);
+  MyServoB.attach(7);
+  MyServo.write(pos); // המיקום ההתחלתי בנקודת אמצע
+  MyServoB.write(posB);
+  //--------------------------------------------------
+  up_down();
+  options(); 
+  
+  }
+  //--------------------------------------------------------
+  void loop()
+  {
+   
+  
+  if (Serial.available() > 0) 
+  {   // תווים לקריאה  BUFER אם יש ב
+      MODE_A = Serial.read();     //  order קרא את התו למשתנה 
+  if(MODE_A=='A')
+  {
+  automatic();
+  }
+  else if (MODE_A=='M')
+  {
+  manual();
+  }
+  }
+  
+  }
+  
+  
+  //-----------------------------------------------------------
+  
+  void options()
+  {
+  Serial.println(" choose M for MANUAL mode ");
+  Serial.println(" choose A for AUTOMAT mode ");
+  }
+  
+  //---------------------------------------------------------
+
+  //------------------------------------------------------------
+
+  
+  void bluetooth()
+  {
+    Serial.println("Enter AT commands:");
+   BTserial.begin(9600);
+     // Keep reading from HC-06 and send to Arduino Serial Monitor
+    if (BTserial.available())
+    {  
+        Serial.write(BTserial.read());//RECIVE DESDE EL BLUETOOTH A PC
+    }
+ 
+    // Keep reading from Arduino Serial Monitor and send to HC-06
+    if (Serial.available())
+    {
+        BTserial.write(Serial.read());//MANDA AL CELULAR DESDE PC
+    
+
+      
+    }
+  
+  }
+ 
+  
+  //-------------------------------------------------------------
+  
+  void manual()
+  {
+  int sensorValue2 = digitalRead(2);
+  int sensorValue3 = digitalRead(3);
+  int sensorValue4 = digitalRead(4);
+  int sensorValue5 = digitalRead(5);
+  Serial.println(" MANUAL mode");
+  Serial.println(" choose A B C D for 4 stations ");
+  Serial.println(" press E for exit the manual mode ");
+  do{
+  if (Serial.available() > 0) 
+  { // תווים לקריאה BUFER אם יש ב
+  order = Serial.read(); // order קרא את התו למשתנה
+  if(order == 'A') 
+  { // L אם התו שנקרא הוא 
+  pos = 10; // הוסף לזוית הנוכחית 5 מעלות
+  MyServo.write(pos); 
+  delay(200);
+  Serial.println("Are you scared ?");
+  
+  }
+  else if(order == 'B') 
+  { // R אחרת, אם התו שנקרא הוא 
+  pos = 40; // החסר מהזווית הנוכחית 5 מעלות
+  MyServo.write(pos);
+  delay(200);
+  Serial.println("Gotcha in sector B ?");
+  
+  }
+  else if(order == 'C')
+  { // R אחרת, אם התו שנקרא הוא 
+  pos = 80; // החסר מהזווית הנוכחית 5 מעלות
+  MyServo.write(pos);
+  delay(200);
+  Serial.println("They will come to you ");
+  } 
+  else if(order == 'D') 
+  { // R אחרת, אם התו שנקרא הוא 
+  pos = 120; // החסר מהזווית הנוכחית 5 מעלות
+  MyServo.write(pos);
+  delay(200);
+  Serial.println("Any last words ?");
+  } 
+  
+  
+  }
+  //pos=90;
+  //MyServo.write(pos);
+   
+  delay(20);
+  }while(order!='E');
+  
+  
+    option();
+  
+
+  }
+  
+  //----------------------------------------------------------
+  
+  void automatic()
+  {
+  
+  {
+  start:
+  Serial.println(" AUTO MODE...PLEASE PUT YOUR HAND IN THE BOX");
+  while (1)
+  {
+  int sensorValue2 = digitalRead(2);
+  int sensorValue3 = digitalRead(3);
+  int sensorValue4 = digitalRead(4);
+  int sensorValue5 = digitalRead(5);
+  
+  if(sensorValue2)
+  {
+  sensor2();
+  delay(50);
+  bluetooth();
+  goto start;
+  }
+  
+  else if (sensorValue3)
+  {
+  sensor3();
+  delay(50);
+  bluetooth();
+  delay(10000);
+  goto start;
+  }
+  
+  else if (sensorValue4)
+  {
+  sensor4();
+  delay(50);
+  bluetooth();
+  delay(10000);    
+  goto start;
+  }
+  
+  else if (sensorValue5)
+  {
+  sensor5();
+  delay(50);
+  bluetooth();
+  delay(10000);
+  goto start;
+  }
+  else
+  digitalWrite(13, LOW); // set the LED off
+  }
+  }
+  
+  }
+  //-----------------------------------------------------
+ void sensor2()
+  {
+  Serial.println(" SERVO 2 IS WORKING");
+  digitalWrite(13, HIGH);// set the LED on
+  pos = 10; 
+  posB= 10; 
+  MyServo.write(pos);
+
+  }
+  void sensor3()
+  {
+  Serial.println(" SERVO 3 IS WORKING");
+  digitalWrite(13, HIGH); // set the LED on
+  pos = 30;
+  posB = 30;  
+  MyServo.write(pos);
+
+  }
+  void sensor4()
+  {
+  Serial.println(" SERVO 4 IS WORKING");
+  digitalWrite(13, HIGH); // set the LED on
+  pos = 70; 
+  posB = 70; 
+  MyServo.write(pos);
+ 
+  }
+  void sensor5()
+  {
+  Serial.println(" SERVO 5 IS WORKING");
+  digitalWrite(13, HIGH); // set the LED on
+  pos = 100; 
+  posB = 100; 
+  MyServo.write(pos);
+
+ 
+  }
+  //---------------------------------------------------------‏
+  
+  void up_down(){
+    Serial.println(" first,choose U OR D for up-down direction");
+    Serial.println("press F when finish");
+  
+    do
+    {
+   if (Serial.available() > 0) {   // תווים לקריאה  BUFER אם יש ב
+      updown = Serial.read();     //  order קרא את התו למשתנה 
+      if(updown == 'U') {   //    L אם התו שנקרא הוא 
+             pos = pos + 5;  // הוסף לזוית הנוכחית 5 מעלות
+              MyServoB.write(pos);  
+            }
+      else if(updown == 'D') {      //   R אחרת, אם התו שנקרא הוא 
+                pos = pos -5;      // החסר מהזווית הנוכחית 5 מעלות
+              MyServoB.write(pos);
+            }
+    }
+      delay(20);
+    }  while(updown!='F');
+    Serial.println("finished!!!");
+  
+  }
+
+  void option()
+  {
+   setup();
+  }
+ //-------------------------------------------------------------
+
+ void text()
+ {
+  Serial.println("test number one");
+ }
+
+
